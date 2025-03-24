@@ -1,0 +1,212 @@
+/* General Styles */
+body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    text-align: center;
+    color: #ff6f61;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+  }
+  
+  /* Form Styles */
+  .add-task-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .add-task-form input,
+  .add-task-form textarea {
+    padding: 10px;
+    border: 2px solid #ff6f61;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+  }
+  
+  .add-task-form textarea {
+    resize: vertical;
+    height: 80px;
+  }
+  
+  /* Button Styles */
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-btn {
+    background-color: #ff6f61;
+    color: white;
+  }
+  
+  .add-btn:hover {
+    background-color: #ff4a3d;
+  }
+  
+  .toggle-btn {
+    background-color: #6bff61;
+    color: #333;
+  }
+  
+  .toggle-btn:hover {
+    background-color: #4dff3d;
+  }
+  
+  .delete-btn {
+    background-color: #ff6161;
+    color: white;
+  }
+  
+  .delete-btn:hover {
+    background-color: #ff3d3d;
+  }
+  
+  /* Task List Styles */
+  .task-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .task-item {
+    background-color: #f0f0f0;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid #ddd;
+  }
+  
+  .task-item.completed {
+    background-color: #d0f0d0;
+    border-color: #6bff61;
+  }
+  
+  .task-content h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5rem;
+  }
+  
+  .task-content p {
+    margin: 5px 0 0;
+    color: #555;
+  }
+  
+  .task-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+/* Trash Button Styles */
+.trash-btn {
+    background-color: #ff6161;
+    color: white;
+  }
+  
+  .trash-btn:hover {
+    background-color: #ff3d3d;
+  }
+  
+  /* Restore Button Styles */
+  .restore-btn {
+    background-color: #61b3ff;
+    color: white;
+  }
+  
+  .restore-btn:hover {
+    background-color: #3d9bff;
+  }
+  
+  /* Back Button Styles */
+  .back-btn {
+    background-color: #6bff61;
+    color: #333;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 20px;
+  }
+  
+  .back-btn:hover {
+    background-color: #4dff3d;
+  }
+  
+  /* Trash Link Styles */
+  .trash-link {
+    background-color: #ff6f61;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 20px;
+  }
+  
+  .trash-link:hover {
+    background-color: #ff4a3d;
+  }
+
+  /* Search Form Styles */
+.search-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .search-form input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #ff6f61;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+  }
+  
+  .search-btn {
+    background-color: #61b3ff;
+    color: white;
+  }
+  
+  .search-btn:hover {
+    background-color: #3d9bff;
+  }
+
+  /* Completed Link Styles */
+.completed-link {
+    background-color: #6bff61;
+    color: #333;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 20px;
+  }
+  
+  .completed-link:hover {
+    background-color: #4dff3d;
+  }

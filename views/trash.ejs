@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trash - Task Manager</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🗑️ Trash</h1>
+
+    <!-- Link to go back to the main page -->
+    <a href="/" class="btn back-btn">🔙 Back to Tasks</a>
+
+    <!-- List of tasks in the trash -->
+    <ul class="task-list">
+      <% trash.forEach(task => { %>
+        <li class="task-item">
+          <div class="task-content">
+            <h3><%= task.title %></h3>
+            <p><%= task.description %></p>
+          </div>
+          <div class="task-actions">
+            <form action="/restore-from-trash/<%= task.id %>" method="POST" style="display: inline;">
+              <button type="submit" class="btn restore-btn">🔙 Restore</button>
+            </form>
+            <form action="/delete-permanently/<%= task.id %>" method="POST" style="display: inline;">
+              <button type="submit" class="btn delete-btn">🗑️ Delete Permanently</button>
+            </form>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</body>
+</html>

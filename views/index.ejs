@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Task Manager</h1>
+
+    <!-- Form to add new tasks -->
+    <form action="/add-task" method="POST" class="add-task-form">
+      <input type="text" name="title" placeholder="✨ Task title" required>
+      <textarea name="description" placeholder="📝 Task description"></textarea>
+      <button type="submit" class="btn add-btn">➕ Add Task</button>
+    </form>
+
+    <!-- Search Form -->
+    <form action="/search" method="GET" class="search-form">
+      <input type="text" name="query" placeholder="🔍 Search tasks..." required>
+      <button type="submit" class="btn search-btn">Search</button>
+    </form>
+
+    <!-- List of tasks -->
+    <ul class="task-list">
+      <% tasks.forEach(task => { %>
+        <li class="task-item <%= task.completed ? 'completed' : '' %>">
+          <div class="task-content">
+            <h3><%= task.title %></h3>
+            <p><%= task.description %></p>
+          </div>
+          <div class="task-actions">
+            <form action="/toggle-task/<%= task.id %>" method="POST" style="display: inline;">
+              <button type="submit" class="btn toggle-btn">
+                <%= task.completed ? '🔙 Undo' : '✅ Complete' %>
+              </button>
+            </form>
+            <form action="/move-to-trash/<%= task.id %>" method="POST" style="display: inline;">
+              <button type="submit" class="btn trash-btn">🗑️ Move to Trash</button>
+            </form>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+
+    <!-- Links to view completed tasks and trash -->
+    <div class="links">
+      <a href="/completed" class="btn completed-link">✅ View Completed Tasks</a>
+      <a href="/trash" class="btn trash-link">🗑️ View Trash</a>
+    </div>
+  </div>
+</body>
+</html>
