@@ -1,21 +1,19 @@
-import express from "express"
+import express from "express";
+import path from "path";
+import signupRoutes from "./routes/signupRoutes.js";
 const app = express();
-const port = 3000;
 
-// Middleware to parse form data
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(process.cwd(), "public")));
+app.set("view engine", "ejs");
+app.set("views", path.join(process.cwd(), "views"));
 
-// Set up EJS as the templating engine
-app.set('view engine', 'ejs');
+const loggingMiddleware = (req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${req.method} ${req.url}`);
+  next();
+};
 
-// Serve static files from the "public" directory
-app.use(express.static('public'));
-
-// In-memory task storage
-let tasks = []; 
-let completedTasks = [];
-let trash = []; 
-let idCounter = 1;
 
 // Routes
 
@@ -135,9 +133,4 @@ app.get('/search', (req, res) => {
 // Error handling for invalid routes
 app.use((req, res) => {
   res.status(404).send('Page not found');
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
 });
