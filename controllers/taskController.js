@@ -1,86 +1,98 @@
-import { getAllSignups, addSignup } from "../models/subscriberModel.js";
+// Filename: controllers/taskController.js
+import { 
+  getAllTasks,
+  getCompletedTasks,
+  getDeletedTasks,
+  createTask,
+  toggleTaskCompletion,
+  moveToTrash as dbMoveToTrash,
+  restoreFromTrash as dbRestoreFromTrash,
+  deletePermanently as dbDeletePermanently,
+  searchTasks
+} from "../models/taskModel.js";
 
-export const getHome = (req, res) => {
+export const getHome = async (req, res) => {
+  try {
+    const tasks = await getAllTasks();
     res.render('index', { tasks });
-  };
+  } catch (err) {
+    res.status(500).render('error', { message: 'Failed to load tasks' });
+  }
+};
 
-export const addtask = (req, res) => {
-    const { title, description } = req.body;
-    if (!title) {
-      return res.status(400).send('Title is required');
-    }
-    const newTask = {
-      id: idCounter++,
-      title,
-      description: description || '',
-      completed: false,
-    };
-    tasks.push(newTask);
+export const addTask = async (req, res) => {
+  const { title, description } = req.body;
+  if (!title) {
+    return res.status(400).send('Title is required');
+  }
+  
+  try {
+    await createTask(title, description);
     res.redirect('/');
-  };
+  } catch (err) {
+    res.status(500).render('error', { message: 'Failed to add task' });
+  }
+};
 
-export const toggleTaskId = (req, res) => {
-    const taskId = parseInt(req.params.id);
-  
-    // Check if the task is in the active tasks array
-    let taskIndex = tasks.findIndex((t) => t.id === taskId);
-    if (taskIndex !== -1) {
-      const [task] = tasks.splice(taskIndex, 1); 
-      task.completed = true;
-      completedTasks.push(task); 
-    } else {
-      
-      taskIndex = completedTasks.findIndex((t) => t.id === taskId);
-      if (taskIndex !== -1) {
-        const [task] = completedTasks.splice(taskIndex, 1); 
-        task.completed = false;
-        tasks.push(task); 
-      } else {
-        return res.status(404).send('Task not found');
-      }
-    }
-  
-    res.redirect('/');
-  };
+export const toggleTaskId = async (req, res) => {
+  try {
+    await toggleTaskCompletion(req.params.id);
+    res.redirect('back');
+  } catch (err) {
+    res.status(404).send('Task not found');
+  }
+};
 
+export const moveToTrash = async (req, res) => {
+  try {
+    await dbMoveToTrash(req.params.id);
+    res.redirect('back');
+  } catch (err) {
+    res.status(404).send('Task not found');
+  }
+};
 
-  export const moveToTrash = (req, res) => {
-    const taskId = parseInt(req.params.id);
-  
-    
-    let taskIndex = tasks.findIndex((t) => t.id === taskId);
-    if (taskIndex !== -1) {
-      const [task] = tasks.splice(taskIndex, 1); 
-      trash.push(task); 
-    } else {
-      
-      taskIndex = completedTasks.findIndex((t) => t.id === taskId);
-      if (taskIndex !== -1) {
-        const [task] = completedTasks.splice(taskIndex, 1); 
-        trash.push(task); 
-      } else {
-        return res.status(404).send('Task not found');
-      }
-    }
-  
-    res.redirect('/');
-  };
-
-export const restoreFromTrash = (req, res) => {
-    const taskId = parseInt(req.params.id);
-    const taskIndex = trash.findIndex((t) => t.id === taskId);
-    if (taskIndex === -1) {
-      return res.status(404).send('Task not found in trash');
-    }
-    const [task] = trash.splice(taskIndex, 1); 
-    if (task.completed) {
-      completedTasks.push(task); 
-    } else {
-      tasks.push(task); 
-    }
+export const restoreFromTrash = async (req, res) => {
+  try {
+    await dbRestoreFromTrash(req.params.id);
     res.redirect('/trash');
-  };
+  } catch (err) {
+    res.status(404).send('Task not found in trash');
+  }
+};
 
+export const deletePermanently = async (req, res) => {
+  try {
+    await dbDeletePermanently(req.params.id);
+    res.redirect('/trash');
+  } catch (err) {
+    res.status(404).send('Task not found in trash');
+  }
+};
 
-  export const 
-  
+export const trash = async (req, res) => {
+  try {
+    const trash = await getDeletedTasks();
+    res.render('trash', { trash });
+  } catch (err) {
+    res.status(500).render('error', { message: 'Failed to load trash' });
+  }
+};
+
+export const completed = async (req, res) => {
+  try {
+    const completedTasks = await getCompletedTasks();
+    res.render('completed', { completedTasks });
+  } catch (err) {
+    res.status(500).render('error', { message: 'Failed to load completed tasks' });
+  }
+};
+
+export const search = async (req, res) => {
+  try {
+    const tasks = await searchTasks(req.query.query);
+    res.render('index', { tasks });
+  } catch (err) {
+    res.status(500).render('error', { message: 'Search failed' });
+  }
+};
