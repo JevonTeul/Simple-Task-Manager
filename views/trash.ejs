@@ -1,37 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trash - Task Manager</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <div class="container">
-    <h1>🗑️ Trash</h1>
+<%- include('partials/header', { title: 'Deleted Tasks' }) %>
 
-    <!-- Link to go back to the main page -->
-    <a href="/" class="btn back-btn">🔙 Back to Tasks</a>
+<div class="container">
+    <h1>Deleted Tasks</h1>
+    <a href="/" class="btn btn-secondary">Back to All Tasks</a>
 
-    <!-- List of tasks in the trash -->
-    <ul class="task-list">
-      <% trash.forEach(task => { %>
-        <li class="task-item">
-          <div class="task-content">
-            <h3><%= task.title %></h3>
-            <p><%= task.description %></p>
-          </div>
-          <div class="task-actions">
-            <form action="/restore-from-trash/<%= task.id %>" method="POST" style="display: inline;">
-              <button type="submit" class="btn restore-btn">🔙 Restore</button>
-            </form>
-            <form action="/delete-permanently/<%= task.id %>" method="POST" style="display: inline;">
-              <button type="submit" class="btn delete-btn">🗑️ Delete Permanently</button>
-            </form>
-          </div>
-        </li>
-      <% }) %>
-    </ul>
-  </div>
-</body>
-</html>
+    <% if (trash.length > 0) { %>
+        <ul class="task-list">
+            <% trash.forEach(task => { %>
+                <li class="task-item deleted">
+                    <span class="task-status deleted">Deleted</span>
+                    
+                    <div class="task-content">
+                        <h3><%= task.title %></h3>
+                        <% if (task.description) { %>
+                            <p class="task-description"><%= task.description %></p>
+                        <% } %>
+                        <p class="text-muted">
+                            Deleted: <%= new Date(task.updated_at).toLocaleString() %>
+                        </p>
+                        <% if (task.completed) { %>
+                            <p class="text-success">This task was completed before deletion</p>
+                        <% } %>
+                    </div>
+                    
+                    <div class="task-actions">
+                        <form action="/restore-from-trash/<%= task.id %>" method="POST">
+                            <button type="submit" class="btn btn-success">Restore Task</button>
+                        </form>
+                        <form action="/delete-permanently/<%= task.id %>" method="POST">
+                            <button type="submit" class="btn btn-danger">Delete Permanently</button>
+                        </form>
+                    </div>
+                </li>
+            <% }) %>
+        </ul>
+    <% } else { %>
+        <div class="empty-state">
+            <p>No deleted tasks. When you delete tasks, they'll appear here.</p>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

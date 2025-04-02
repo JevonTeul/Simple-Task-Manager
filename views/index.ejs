@@ -1,55 +1,104 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task Manager</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <div class="container">
+<%- include('partials/header', { title: 'Task Manager' }) %>
+
+<div class="container">
     <h1>Task Manager</h1>
 
-    <!-- Form to add new tasks -->
-    <form action="/add-task" method="POST" class="add-task-form">
-      <input type="text" name="title" placeholder="✨ Task title" required>
-      <textarea name="description" placeholder="📝 Task description"></textarea>
-      <button type="submit" class="btn add-btn">➕ Add Task</button>
-    </form>
-
-    <!-- Search Form -->
-    <form action="/search" method="GET" class="search-form">
-      <input type="text" name="query" placeholder="🔍 Search tasks..." required>
-      <button type="submit" class="btn search-btn">Search</button>
-    </form>
-
-    <!-- List of tasks -->
-    <ul class="task-list">
-      <% tasks.forEach(task => { %>
-        <li class="task-item <%= task.completed ? 'completed' : '' %>">
-          <div class="task-content">
-            <h3><%= task.title %></h3>
-            <p><%= task.description %></p>
-          </div>
-          <div class="task-actions">
-            <form action="/toggle-task/<%= task.id %>" method="POST" style="display: inline;">
-              <button type="submit" class="btn toggle-btn">
-                <%= task.completed ? '🔙 Undo' : '✅ Complete' %>
-              </button>
-            </form>
-            <form action="/move-to-trash/<%= task.id %>" method="POST" style="display: inline;">
-              <button type="submit" class="btn trash-btn">🗑️ Move to Trash</button>
-            </form>
-          </div>
-        </li>
-      <% }) %>
-    </ul>
-
-    <!-- Links to view completed tasks and trash -->
-    <div class="links">
-      <a href="/completed" class="btn completed-link">✅ View Completed Tasks</a>
-      <a href="/trash" class="btn trash-link">🗑️ View Trash</a>
+    <!-- Search Section -->
+    <div class="search-container card">
+        <form action="/search" method="GET" class="search-form">
+            <div class="form-group">
+                <div class="search-input-group">
+                    <input type="text" name="query" placeholder="Search tasks..." 
+                           required minlength="2" class="form-control search-input">
+                    <button type="submit" class="btn btn-info search-btn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
-  </div>
-</body>
-</html>
+
+    <!-- Add Task Section -->
+    <div class="add-task-container card">
+        <form action="/add-task" method="POST" class="add-task-form" id="taskForm">
+            <div class="form-group">
+                <label for="title" class="form-label">Task Title</label>
+                <input type="text" name="title" id="title" placeholder="Enter task title" 
+                       required minlength="3" maxlength="100" class="form-control">
+                <div id="titleError" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="form-label">Description (Optional)</label>
+                <textarea name="description" id="description" 
+                          placeholder="Enter task description"
+                          maxlength="500" class="form-control"></textarea>
+                <div id="descriptionError" class="error-message"></div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Task
+            </button>
+        </form>
+    </div>
+
+    <!-- Task List Section -->
+    <% if (tasks.length > 0) { %>
+        <ul class="task-list">
+            <% tasks.forEach(task => { %>
+                <li class="task-item <%= task.completed ? 'completed' : '' %>">
+                    <% if (task.completed) { %>
+                        <span class="task-status completed">
+                            <i class="fas fa-check-circle"></i> Completed
+                        </span>
+                    <% } %>
+                    
+                    <div class="task-content">
+                        <h3><%= task.title %></h3>
+                        <% if (task.description) { %>
+                            <p class="task-description"><%= task.description %></p>
+                        <% } %>
+                        <p class="text-muted">
+                            <i class="far fa-calendar-alt"></i> Created: <%= new Date(task.created_at).toLocaleString() %>
+                        </p>
+                    </div>
+                    
+                    <div class="task-actions">
+                        <form action="/toggle-task/<%= task.id %>" method="POST">
+                            <button type="submit" class="btn <%= task.completed ? 'btn-secondary' : 'btn-success' %>">
+                                <% if (task.completed) { %>
+                                    <i class="fas fa-undo"></i> Mark Incomplete
+                                <% } else { %>
+                                    <i class="fas fa-check"></i> Mark Complete
+                                <% } %>
+                            </button>
+                        </form>
+                        <form action="/move-to-trash/<%= task.id %>" method="POST">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </li>
+            <% }) %>
+        </ul>
+    <% } else { %>
+        <div class="empty-state card">
+            <i class="far fa-clipboard empty-icon"></i>
+            <h3>No tasks found</h3>
+            <p>Add your first task using the form above</p>
+        </div>
+    <% } %>
+
+    <!-- Navigation Links -->
+    <div class="navigation-links">
+        <a href="/completed" class="btn btn-info">
+            <i class="fas fa-check-double"></i> View Completed Tasks
+        </a>
+        <a href="/trash" class="btn btn-secondary">
+            <i class="fas fa-trash-restore"></i> View Deleted Tasks
+        </a>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

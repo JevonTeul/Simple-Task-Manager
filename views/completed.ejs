@@ -1,37 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Completed Tasks - Task Manager</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <div class="container">
-    <h1>✅ Completed Tasks</h1>
+<%- include('partials/header', { title: 'Completed Tasks' }) %>
 
-    <!-- Link to go back to the main page -->
-    <a href="/" class="btn back-btn">🔙 Back to Tasks</a>
+<div class="container">
+    <h1>Completed Tasks</h1>
+    <a href="/" class="btn btn-secondary">Back to All Tasks</a>
 
-    <!-- List of completed tasks -->
-    <ul class="task-list">
-      <% completedTasks.forEach(task => { %>
-        <li class="task-item completed">
-          <div class="task-content">
-            <h3><%= task.title %></h3>
-            <p><%= task.description %></p>
-          </div>
-          <div class="task-actions">
-            <form action="/toggle-task/<%= task.id %>" method="POST" style="display: inline;">
-              <button type="submit" class="btn toggle-btn">🔙 Undo</button>
-            </form>
-            <form action="/move-to-trash/<%= task.id %>" method="POST" style="display: inline;">
-              <button type="submit" class="btn trash-btn">🗑️ Move to Trash</button>
-            </form>
-          </div>
-        </li>
-      <% }) %>
-    </ul>
-  </div>
-</body>
-</html>
+    <% if (completedTasks.length > 0) { %>
+        <ul class="task-list">
+            <% completedTasks.forEach(task => { %>
+                <li class="task-item completed">
+                    <span class="task-status completed">Completed</span>
+                    
+                    <div class="task-content">
+                        <h3><%= task.title %></h3>
+                        <% if (task.description) { %>
+                            <p class="task-description"><%= task.description %></p>
+                        <% } %>
+                        <p class="text-muted">
+                            Completed: <%= new Date(task.updated_at).toLocaleString() %>
+                        </p>
+                    </div>
+                    
+                    <div class="task-actions">
+                        <form action="/toggle-task/<%= task.id %>" method="POST">
+                            <button type="submit" class="btn btn-secondary">Mark Incomplete</button>
+                        </form>
+                        <form action="/move-to-trash/<%= task.id %>" method="POST">
+                            <button type="submit" class="btn btn-danger">Delete Task</button>
+                        </form>
+                    </div>
+                </li>
+            <% }) %>
+        </ul>
+    <% } else { %>
+        <div class="empty-state">
+            <p>No completed tasks yet. Complete some tasks to see them here!</p>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
