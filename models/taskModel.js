@@ -127,22 +127,3 @@ export const updateTaskFields = async (id, title, description, priority) => {
   }
 };
 
-export const getFilteredTasks = async (filter) => {
-  try {
-    let queryString = "SELECT * FROM tasks WHERE deleted = false";
-    
-    if (filter === 'active') {
-      queryString += " AND completed = false";
-    } else if (filter === 'completed') {
-      queryString += " AND completed = true";
-    }
-    
-    queryString += " ORDER BY CASE WHEN priority = 'high' THEN 1 WHEN priority = 'medium' THEN 2 WHEN priority = 'low' THEN 3 ELSE 4 END, created_at DESC";
-    
-    const result = await query(queryString);
-    return result.rows;
-  } catch (error) {
-    console.error("Error fetching filtered tasks:", error);
-    throw error;
-  }
-};

@@ -68,7 +68,6 @@ export const addTask = async (req, res) => {
         tasks,
         error: validationErrors.join(', '),
         formData: { title, description, priority },
-        filter: req.query.filter,
         searchQuery: req.query.query
       });
     } catch (err) {
@@ -252,23 +251,3 @@ export const getAllTasks = async () => {
   }
 };
 
-const getFilteredTasks = async (filter) => {
-  try {
-    let queryString = "SELECT * FROM tasks WHERE deleted = false";
-    const params = [];
-    
-    if (filter === 'active') {
-      queryString += " AND completed = false";
-    } else if (filter === 'completed') {
-      queryString += " AND completed = true";
-    }
-    
-    queryString += " ORDER BY created_at DESC";
-    
-    const result = await query(queryString, params);
-    return result.rows;
-  } catch (error) {
-    console.error("Error fetching filtered tasks:", error);
-    throw error;
-  }
-};
