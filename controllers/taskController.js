@@ -4,19 +4,20 @@ import {
   getCompletedTasks,
   getDeletedTasks,
   createTask,
-  toggleTaskCompletion,
+  toggleTaskCompletion as dbToggleTaskCompletion,
   moveToTrash as dbMoveToTrash,
   restoreFromTrash as dbRestoreFromTrash,
   deletePermanently as dbDeletePermanently,
-  searchTasks
+  searchTasks,
+  updateTaskFields
 } from "../models/taskModel.js";
 
 // Helper function for validation
 const validateTaskInput = (title, description) => {
   const errors = [];
   
-  if (!title || title.trim().length < 3) {
-    errors.push("Title must be at least 3 characters");
+  if (!title || title.trim().length < 3 || title.length > 100) {
+    errors.push("Title must be between 3 and 100 characters");
   }
   
   if (description && description.length > 500) {
@@ -28,11 +29,22 @@ const validateTaskInput = (title, description) => {
 
 export const getHome = async (req, res) => {
   try {
-    const tasks = await getAllTasks();
+    const filter = req.query.filter;
+    let tasks;
+    
+    if (filter) {
+      tasks = await getFilteredTasks(filter);
+    } else {
+      tasks = await getAllTasks();
+    }
+    
     res.render('index', { 
       tasks,
+      filter,
+      searchQuery: req.query.query || '', // Add this line
       success: req.query.success,
-      error: req.query.error
+      error: req.query.error,
+      formData: {}
     });
   } catch (err) {
     console.error("Error in getHome:", err);
@@ -44,9 +56,9 @@ export const getHome = async (req, res) => {
 };
 
 export const addTask = async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, priority } = req.body;
   
-  // Validate input
+  // Server-side validation
   const validationErrors = validateTaskInput(title, description);
   
   if (validationErrors.length > 0) {
@@ -55,7 +67,9 @@ export const addTask = async (req, res) => {
       return res.render('index', {
         tasks,
         error: validationErrors.join(', '),
-        formData: { title, description } // To repopulate form
+        formData: { title, description, priority },
+        filter: req.query.filter,
+        searchQuery: req.query.query
       });
     } catch (err) {
       console.error("Error in addTask validation:", err);
@@ -67,7 +81,7 @@ export const addTask = async (req, res) => {
   }
   
   try {
-    await createTask(title.trim(), description?.trim());
+    await createTask(title.trim(), description?.trim(), priority);
     res.redirect('/?success=Task added successfully');
   } catch (err) {
     console.error("Error in addTask:", err);
@@ -78,27 +92,63 @@ export const addTask = async (req, res) => {
   }
 };
 
-export const toggleTaskId = async (req, res) => {
+export const toggleTaskCompletion = async (req, res) => {
   try {
-    await toggleTaskCompletion(req.params.id);
-    res.redirect('back');
+      await dbToggleTaskCompletion(req.params.id);
+      res.redirect(req.get('referer') || '/'); 
   } catch (err) {
-    console.error("Error in toggleTaskId:", err);
-    res.status(404).render('error', { 
-      message: 'Task not found',
-      error: process.env.NODE_ENV === "development" ? err : {}
-    });
+      console.error("Error in toggleTaskCompletion:", err);
+      res.status(500).render('error', { 
+          message: 'Failed to update task status',
+          error: process.env.NODE_ENV === "development" ? err : {}
+      });
   }
 };
 
-export const moveToTrash = async (req, res) => {
+export const deleteTask = async (req, res) => {
   try {
-    await dbMoveToTrash(req.params.id);
-    res.redirect('back');
+      await dbMoveToTrash(req.params.id);
+      res.redirect(req.get('referer') || '/');  
   } catch (err) {
-    console.error("Error in moveToTrash:", err);
-    res.status(404).render('error', { 
-      message: 'Task not found',
+      console.error("Error in deleteTask:", err);
+      res.status(500).render('error', { 
+          message: 'Failed to delete task',
+          error: process.env.NODE_ENV === "development" ? err : {}
+      });
+  }
+};
+
+export const updateTask = async (req, res) => {
+  const { id } = req.params;
+  const { title, description, priority } = req.body;
+  
+  // Server-side validation
+  const validationErrors = validateTaskInput(title, description);
+  
+  if (validationErrors.length > 0) {
+    try {
+      const tasks = await getAllTasks();
+      return res.render('index', {
+        tasks,
+        error: validationErrors.join(', '),
+        formData: { title, description, priority }
+      });
+    } catch (err) {
+      console.error("Error in updateTask validation:", err);
+      return res.status(500).render('error', {
+        message: 'Failed to validate task update',
+        error: process.env.NODE_ENV === "development" ? err : {}
+      });
+    }
+  }
+  
+  try {
+    await updateTaskFields(id, title.trim(), description?.trim(), priority);
+    res.redirect('/');
+  } catch (err) {
+    console.error("Error in updateTask:", err);
+    res.status(500).render('error', { 
+      message: 'Failed to update task',
       error: process.env.NODE_ENV === "development" ? err : {}
     });
   }
@@ -175,7 +225,11 @@ export const search = async (req, res) => {
     const tasks = await searchTasks(query);
     res.render('index', { 
       tasks,
-      searchQuery: query
+      searchQuery: query, // This is already correct
+      formData: {},
+      filter: null,
+      success: null,
+      error: null
     });
   } catch (err) {
     console.error("Error in search:", err);

@@ -400,3 +400,71 @@ textarea.form-control {
 .fas, .far {
   margin-right: 0.5rem;
 }
+
+/* ========== FORM VALIDATION STYLES ========== */
+.form-control.invalid {
+  border-color: var(--danger);
+  background-color: #fff5f5;
+}
+
+.form-control.invalid:focus {
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+}
+
+.error-message {
+  color: var(--danger);
+  font-size: var(--text-sm);
+  margin-top: var(--space-xs);
+  display: none;
+}
+
+.error-message.show {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ========== PRIORITY BADGES ========== */
+.priority-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: white;
+  margin-right: 0.5rem;
+}
+
+.priority-badge.high {
+  background-color: var(--danger);
+}
+
+.priority-badge.medium {
+  background-color: var(--warning);
+}
+
+.priority-badge.low {
+  background-color: var(--success);
+}
+
+/* ========== TASK ITEM STATES ========== */
+.task-item.priority-high {
+  border-left-color: var(--danger);
+}
+
+.task-item.priority-medium {
+  border-left-color: var(--warning);
+}
+
+.task-item.priority-low {
+  border-left-color: var(--success);
+}
+
+.task-item.completed {
+  background-color: #f8fff8;
+  opacity: 0.8;
+}
+
+.task-item.deleted {
+  background-color: #f9f9f9;
+  opacity: 0.7;
+}

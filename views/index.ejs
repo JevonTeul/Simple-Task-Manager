@@ -2,14 +2,30 @@
 
 <div class="container">
     <h1>Task Manager</h1>
-
+    
+    <!-- Display messages -->
+    <% if (locals.error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <% if (locals.success) { %>
+        <div class="alert alert-success"><%= success %></div>
+    <% } %>
+    
+    <!-- Filter Options -->
+    <div class="filter-options mb-3">
+        <a href="/" class="btn btn-outline-primary <%= !filter ? 'active' : '' %>">All Tasks</a>
+        <a href="/?filter=active" class="btn btn-outline-primary <%= filter === 'active' ? 'active' : '' %>">Active</a>
+        <a href="/?filter=completed" class="btn btn-outline-primary <%= filter === 'completed' ? 'active' : '' %>">Completed</a>
+    </div>
+    
     <!-- Search Section -->
-    <div class="search-container card">
+    <div class="search-container card mb-3">
         <form action="/search" method="GET" class="search-form">
             <div class="form-group">
                 <div class="search-input-group">
                     <input type="text" name="query" placeholder="Search tasks..." 
-                           required minlength="2" class="form-control search-input">
+                           required minlength="2" class="form-control search-input"
+                           value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
                     <button type="submit" class="btn btn-info search-btn">
                         <i class="fas fa-search"></i> Search
                     </button>
@@ -17,23 +33,33 @@
             </div>
         </form>
     </div>
-
+    
     <!-- Add Task Section -->
-    <div class="add-task-container card">
-        <form action="/add-task" method="POST" class="add-task-form" id="taskForm">
+    <div class="add-task-container card mb-3">
+        <form action="/tasks" method="POST" class="add-task-form" id="taskForm">
             <div class="form-group">
-                <label for="title" class="form-label">Task Title</label>
+                <label for="title" class="form-label">Task Title <span class="text-danger">*</span></label>
                 <input type="text" name="title" id="title" placeholder="Enter task title" 
-                       required minlength="3" maxlength="100" class="form-control">
-                <div id="titleError" class="error-message"></div>
+                       required minlength="3" maxlength="100" class="form-control"
+                       value="<%= formData && formData.title ? formData.title : '' %>">
+                <div class="invalid-feedback">Title must be 3-100 characters</div>
             </div>
             
             <div class="form-group">
                 <label for="description" class="form-label">Description (Optional)</label>
                 <textarea name="description" id="description" 
                           placeholder="Enter task description"
-                          maxlength="500" class="form-control"></textarea>
-                <div id="descriptionError" class="error-message"></div>
+                          maxlength="500" class="form-control"><%= formData && formData.description ? formData.description : '' %></textarea>
+                <div class="invalid-feedback">Description cannot exceed 500 characters</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="priority" class="form-label">Priority</label>
+                <select name="priority" id="priority" class="form-control">
+                    <option value="low" <%= formData && formData.priority === 'low' ? 'selected' : '' %>>Low</option>
+                    <option value="medium" <%= formData && formData.priority === 'medium' ? 'selected' : '' %> selected>Medium</option>
+                    <option value="high" <%= formData && formData.priority === 'high' ? 'selected' : '' %>>High</option>
+                </select>
             </div>
             
             <button type="submit" class="btn btn-primary">
@@ -41,12 +67,17 @@
             </button>
         </form>
     </div>
-
+    
     <!-- Task List Section -->
-    <% if (tasks.length > 0) { %>
+    <% if (tasks && tasks.length > 0) { %>
         <ul class="task-list">
             <% tasks.forEach(task => { %>
-                <li class="task-item <%= task.completed ? 'completed' : '' %>">
+                <li class="task-item <%= task.completed ? 'completed' : '' %> priority-<%= task.priority || 'medium' %>">
+                    <!-- Priority Indicator -->
+                    <span class="priority-badge <%= task.priority || 'medium' %>">
+                        <%= task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'Medium' %>
+                    </span>
+                    
                     <% if (task.completed) { %>
                         <span class="task-status completed">
                             <i class="fas fa-check-circle"></i> Completed
@@ -64,7 +95,9 @@
                     </div>
                     
                     <div class="task-actions">
-                        <form action="/toggle-task/<%= task.id %>" method="POST">
+                        <!-- Mark Complete/Incomplete -->
+                        <form action="/tasks/<%= task.id %>" method="POST" class="d-inline-block">
+                            <input type="hidden" name="_method" value="PATCH">
                             <button type="submit" class="btn <%= task.completed ? 'btn-secondary' : 'btn-success' %>">
                                 <% if (task.completed) { %>
                                     <i class="fas fa-undo"></i> Mark Incomplete
@@ -73,7 +106,10 @@
                                 <% } %>
                             </button>
                         </form>
-                        <form action="/move-to-trash/<%= task.id %>" method="POST">
+                        
+                        <!-- Delete Task -->
+                        <form action="/tasks/<%= task.id %>" method="POST" class="d-inline-block">
+                            <input type="hidden" name="_method" value="DELETE">
                             <button type="submit" class="btn btn-danger">
                                 <i class="fas fa-trash-alt"></i> Delete
                             </button>
@@ -89,9 +125,9 @@
             <p>Add your first task using the form above</p>
         </div>
     <% } %>
-
+    
     <!-- Navigation Links -->
-    <div class="navigation-links">
+    <div class="navigation-links mt-3">
         <a href="/completed" class="btn btn-info">
             <i class="fas fa-check-double"></i> View Completed Tasks
         </a>
@@ -102,3 +138,21 @@
 </div>
 
 <%- include('partials/footer') %>
+
+<script>
+// Client-side validation
+document.addEventListener('DOMContentLoaded', function() {
+  const forms = document.querySelectorAll('form[method="POST"]');
+  
+  forms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+      const titleInput = this.querySelector('[name="title"]');
+      if (titleInput && titleInput.value.trim().length < 3) {
+        e.preventDefault();
+        titleInput.classList.add('is-invalid');
+        return false;
+      }
+    });
+  });
+});
+</script>

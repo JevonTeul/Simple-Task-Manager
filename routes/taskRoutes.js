@@ -4,13 +4,14 @@ const router = express.Router();
 import {
   getHome,
   addTask,
-  toggleTaskId,
-  moveToTrash,
-  restoreFromTrash,
-  deletePermanently,
+  toggleTaskCompletion,
+  deleteTask,
+  updateTask,
   trash,
   completed,
-  search
+  search,
+  restoreFromTrash,
+  deletePermanently
 } from "../controllers/taskController.js";
 
 // Display routes
@@ -19,10 +20,13 @@ router.get("/trash", trash);
 router.get("/completed", completed);
 router.get("/search", search);
 
-// Action routes
-router.post("/add-task", addTask);
-router.post("/toggle-task/:id", toggleTaskId);
-router.post("/move-to-trash/:id", moveToTrash);
+// Action routes - Updated to match requirements
+router.post("/tasks", addTask);              // Changed from /add-task
+router.patch("/tasks/:id", toggleTaskCompletion);  // Changed from POST /toggle-task/:id
+router.delete("/tasks/:id", deleteTask);     // Changed from POST /move-to-trash/:id
+router.put("/tasks/:id", updateTask);        // New route for updating task fields
+
+// Keep these as they are (not in requirements but useful)
 router.post("/restore-from-trash/:id", restoreFromTrash);
 router.post("/delete-permanently/:id", deletePermanently);
 

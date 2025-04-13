@@ -2,13 +2,31 @@
 
 <div class="container">
     <h1>Completed Tasks</h1>
-    <a href="/" class="btn btn-secondary">Back to All Tasks</a>
-
-    <% if (completedTasks.length > 0) { %>
+    
+    <!-- Display messages -->
+    <% if (locals.error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <% if (locals.success) { %>
+        <div class="alert alert-success"><%= success %></div>
+    <% } %>
+    
+    <a href="/" class="btn btn-secondary mb-3">
+        <i class="fas fa-arrow-left"></i> Back to All Tasks
+    </a>
+    
+    <% if (completedTasks && completedTasks.length > 0) { %>
         <ul class="task-list">
             <% completedTasks.forEach(task => { %>
-                <li class="task-item completed">
-                    <span class="task-status completed">Completed</span>
+                <li class="task-item completed priority-<%= task.priority || 'medium' %>">
+                    <!-- Priority Indicator -->
+                    <span class="priority-badge <%= task.priority || 'medium' %>">
+                        <%= task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'Medium' %>
+                    </span>
+                    
+                    <span class="task-status completed">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </span>
                     
                     <div class="task-content">
                         <h3><%= task.title %></h3>
@@ -16,26 +34,53 @@
                             <p class="task-description"><%= task.description %></p>
                         <% } %>
                         <p class="text-muted">
-                            Completed: <%= new Date(task.updated_at).toLocaleString() %>
+                            <i class="far fa-calendar-alt"></i> Completed: <%= new Date(task.updated_at || task.created_at).toLocaleString() %>
                         </p>
                     </div>
                     
                     <div class="task-actions">
-                        <form action="/toggle-task/<%= task.id %>" method="POST">
-                            <button type="submit" class="btn btn-secondary">Mark Incomplete</button>
+                        <!-- Mark Incomplete -->
+                        <form action="/tasks/<%= task.id %>" method="POST" class="d-inline-block">
+                            <input type="hidden" name="_method" value="PATCH">
+                            <button type="submit" class="btn btn-secondary">
+                                <i class="fas fa-undo"></i> Mark Incomplete
+                            </button>
                         </form>
-                        <form action="/move-to-trash/<%= task.id %>" method="POST">
-                            <button type="submit" class="btn btn-danger">Delete Task</button>
+                        
+                        <!-- Delete Task -->
+                        <form action="/tasks/<%= task.id %>" method="POST" class="d-inline-block">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
                         </form>
                     </div>
                 </li>
             <% }) %>
         </ul>
     <% } else { %>
-        <div class="empty-state">
-            <p>No completed tasks yet. Complete some tasks to see them here!</p>
+        <div class="empty-state card">
+            <i class="fas fa-check-circle empty-icon"></i>
+            <h3>No completed tasks</h3>
+            <p>When you complete tasks, they'll appear here</p>
         </div>
     <% } %>
 </div>
 
 <%- include('partials/footer') %>
+
+<script>
+// Ensure forms submit properly
+document.addEventListener('DOMContentLoaded', function() {
+    // Add confirmation for delete actions
+    document.querySelectorAll('form[action*="/tasks/"]').forEach(form => {
+        if (form.querySelector('input[name="_method"][value="DELETE"]')) {
+            form.addEventListener('submit', function(e) {
+                if (!confirm('Are you sure you want to delete this task?')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+});
+</script>

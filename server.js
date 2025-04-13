@@ -1,43 +1,52 @@
-// Filename: server.js
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import taskRoutes from "./routes/taskRoutes.js";
+import methodOverride from "./utils/methodOverride.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Middleware
+// 1. Static files
+app.use(express.static(path.join(__dirname, "public")));
+
+// 2. Body parsers (MUST come first)
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // Add JSON parsing middleware
+app.use(express.json());
 
-// Serve static files from public directory
-app.use(express.static(new URL("./public", import.meta.url).pathname));
+// 3. Our custom method override
+app.use(methodOverride);
 
-// Set view engine and views directory
-app.set("view engine", "ejs");
-app.set("views", new URL("./views", import.meta.url).pathname);
-
-// Custom logging middleware
-const loggingMiddleware = (req, res, next) => {
-  const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${req.method} ${req.url}`);
+// 4. Enhanced debug middleware
+app.use((req, res, next) => {
+  console.log('\n--- REQUEST DEBUG ---');
+  console.log('Method:', req.method);
+  if (req.originalMethod) {
+    console.log('Original Method:', req.originalMethod);
+  }
+  console.log('Path:', req.path);
+  console.log('Body:', req.body);
   next();
-};
-app.use(loggingMiddleware);
+});
 
-// Routes middleware
+// 5. View engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+// 6. Routes
 app.use("/", taskRoutes);
 
-// Error handling middleware
+// Error handling
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('ERROR:', err.stack);
   res.status(500).render("error", { 
     message: "Something went wrong!",
     error: process.env.NODE_ENV === "development" ? err : {}
   });
 });
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).render("error", { 
     message: "404 Not Found",
@@ -45,8 +54,8 @@ app.use((req, res) => {
   });
 });
 
-// Server startup
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Task Manager running at http://localhost:${PORT}/`);
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log('Custom method override middleware is active');
 });

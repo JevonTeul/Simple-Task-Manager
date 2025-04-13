@@ -37,11 +37,11 @@ export const getDeletedTasks = async () => {
   }
 };
 
-export const createTask = async (title, description) => {
+export const createTask = async (title, description, priority = 'medium') => {
   try {
     const result = await query(
-      "INSERT INTO tasks (title, description) VALUES ($1, $2) RETURNING *",
-      [title, description]
+      "INSERT INTO tasks (title, description, priority) VALUES ($1, $2, $3) RETURNING *",
+      [title, description, priority]
     );
     return result.rows[0];
   } catch (error) {
@@ -101,15 +101,48 @@ export const deletePermanently = async (id) => {
 export const searchTasks = async (searchTerm) => {
   try {
     const result = await query(
-      `SELECT * FROM tasks 
-       WHERE (LOWER(title) LIKE $1 OR LOWER(description) LIKE $1) 
-       AND deleted = false 
-       ORDER BY created_at DESC`,
+      `SELECT * FROM tasks
+       WHERE (LOWER(title) LIKE $1 OR LOWER(description) LIKE $1)
+       AND deleted = false
+       ORDER BY CASE WHEN priority = 'high' THEN 1 WHEN priority = 'medium' THEN 2 WHEN priority = 'low' THEN 3 ELSE 4 END, created_at DESC`,
       [`%${searchTerm.toLowerCase()}%`]
     );
     return result.rows;
   } catch (error) {
     console.error("Error searching tasks:", error);
+    throw error;
+  }
+};
+
+export const updateTaskFields = async (id, title, description, priority) => {
+  try {
+    const result = await query(
+      "UPDATE tasks SET title = $1, description = $2, priority = $3 WHERE id = $4 RETURNING *",
+      [title, description, priority, id]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error updating task fields:", error);
+    throw error;
+  }
+};
+
+export const getFilteredTasks = async (filter) => {
+  try {
+    let queryString = "SELECT * FROM tasks WHERE deleted = false";
+    
+    if (filter === 'active') {
+      queryString += " AND completed = false";
+    } else if (filter === 'completed') {
+      queryString += " AND completed = true";
+    }
+    
+    queryString += " ORDER BY CASE WHEN priority = 'high' THEN 1 WHEN priority = 'medium' THEN 2 WHEN priority = 'low' THEN 3 ELSE 4 END, created_at DESC";
+    
+    const result = await query(queryString);
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching filtered tasks:", error);
     throw error;
   }
 };
