@@ -404,7 +404,7 @@ textarea.form-control {
 /* ========== FORM VALIDATION STYLES ========== */
 .form-control.invalid {
   border-color: var(--danger);
-  background-color: #fff5f5;
+  background-color: red;
 }
 
 .form-control.invalid:focus {
@@ -423,6 +423,25 @@ textarea.form-control {
   animation: fadeIn 0.3s ease;
 }
 
+.is-invalid {
+  border: 2px solid #dc3545 !important; 
+  background-color: white !important; 
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.is-invalid ~ .invalid-feedback {
+  display: block;
+}
+
+.form-control:focus {
+  border-color: red!important;
+  box-shadow: none !important;
+}
 /* ========== PRIORITY BADGES ========== */
 .priority-badge {
   display: inline-block;

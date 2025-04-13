@@ -1,6 +1,6 @@
 // Filename: controllers/taskController.js
 import { 
-  getAllTasks,
+  getAllTasks as modelGetAllTasks,
   getCompletedTasks,
   getDeletedTasks,
   createTask,
@@ -33,15 +33,15 @@ export const getHome = async (req, res) => {
     let tasks;
     
     if (filter) {
-      tasks = await getFilteredTasks(filter);
+      tasks = await getFilteredTasks(filter);  
     } else {
-      tasks = await getAllTasks();
+      tasks = await modelGetAllTasks();  
     }
     
     res.render('index', { 
       tasks,
       filter,
-      searchQuery: req.query.query || '', // Add this line
+      searchQuery: req.query.query || '',
       success: req.query.success,
       error: req.query.error,
       formData: {}
@@ -225,7 +225,7 @@ export const search = async (req, res) => {
     const tasks = await searchTasks(query);
     res.render('index', { 
       tasks,
-      searchQuery: query, // This is already correct
+      searchQuery: query,
       formData: {},
       filter: null,
       success: null,
@@ -237,5 +237,38 @@ export const search = async (req, res) => {
       message: 'Search failed',
       error: process.env.NODE_ENV === "development" ? err : {}
     });
+  }
+};
+
+export const getAllTasks = async () => {
+  try {
+    const result = await query(
+      "SELECT * FROM tasks WHERE deleted = false ORDER BY created_at DESC"
+    );
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    throw error;
+  }
+};
+
+const getFilteredTasks = async (filter) => {
+  try {
+    let queryString = "SELECT * FROM tasks WHERE deleted = false";
+    const params = [];
+    
+    if (filter === 'active') {
+      queryString += " AND completed = false";
+    } else if (filter === 'completed') {
+      queryString += " AND completed = true";
+    }
+    
+    queryString += " ORDER BY created_at DESC";
+    
+    const result = await query(queryString, params);
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching filtered tasks:", error);
+    throw error;
   }
 };

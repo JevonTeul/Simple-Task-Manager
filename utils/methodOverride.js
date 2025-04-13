@@ -4,7 +4,6 @@ export default function methodOverride(req, res, next) {
       const method = req.body._method.toUpperCase();
       delete req.body._method;
       
-      // Store original method for debugging
       req.originalMethod = req.method;
       req.method = method;
       

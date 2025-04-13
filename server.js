@@ -9,17 +9,17 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// 1. Static files
+// Static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// 2. Body parsers (MUST come first)
+// Body parsers (MUST come first)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 3. Our custom method override
+// Custom method override
 app.use(methodOverride);
 
-// 4. Enhanced debug middleware
+//Enhanced debug middleware
 app.use((req, res, next) => {
   console.log('\n--- REQUEST DEBUG ---');
   console.log('Method:', req.method);
@@ -31,11 +31,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// 5. View engine
+// View engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// 6. Routes
+// Routes
 app.use("/", taskRoutes);
 
 // Error handling

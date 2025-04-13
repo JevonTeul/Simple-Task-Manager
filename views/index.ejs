@@ -11,13 +11,6 @@
         <div class="alert alert-success"><%= success %></div>
     <% } %>
     
-    <!-- Filter Options -->
-    <div class="filter-options mb-3">
-        <a href="/" class="btn btn-outline-primary <%= !filter ? 'active' : '' %>">All Tasks</a>
-        <a href="/?filter=active" class="btn btn-outline-primary <%= filter === 'active' ? 'active' : '' %>">Active</a>
-        <a href="/?filter=completed" class="btn btn-outline-primary <%= filter === 'completed' ? 'active' : '' %>">Completed</a>
-    </div>
-    
     <!-- Search Section -->
     <div class="search-container card mb-3">
         <form action="/search" method="GET" class="search-form">
@@ -40,26 +33,33 @@
             <div class="form-group">
                 <label for="title" class="form-label">Task Title <span class="text-danger">*</span></label>
                 <input type="text" name="title" id="title" placeholder="Enter task title" 
-                       required minlength="3" maxlength="100" class="form-control"
+                       required minlength="3" maxlength="100" 
+                       class="form-control <%= (locals.errors && locals.errors.title) ? 'is-invalid' : '' %>"
                        value="<%= formData && formData.title ? formData.title : '' %>">
-                <div class="invalid-feedback">Title must be 3-100 characters</div>
+                <% if (locals.errors && locals.errors.title) { %>
+                    <div class="invalid-feedback">
+                        <%= locals.errors.title %>
+                    </div>
+                <% } else { %>
+                    <div class="invalid-feedback">Title must be 3-100 characters</div>
+                <% } %>
             </div>
             
             <div class="form-group">
                 <label for="description" class="form-label">Description (Optional)</label>
                 <textarea name="description" id="description" 
                           placeholder="Enter task description"
-                          maxlength="500" class="form-control"><%= formData && formData.description ? formData.description : '' %></textarea>
-                <div class="invalid-feedback">Description cannot exceed 500 characters</div>
-            </div>
-            
-            <div class="form-group">
-                <label for="priority" class="form-label">Priority</label>
-                <select name="priority" id="priority" class="form-control">
-                    <option value="low" <%= formData && formData.priority === 'low' ? 'selected' : '' %>>Low</option>
-                    <option value="medium" <%= formData && formData.priority === 'medium' ? 'selected' : '' %> selected>Medium</option>
-                    <option value="high" <%= formData && formData.priority === 'high' ? 'selected' : '' %>>High</option>
-                </select>
+                          maxlength="500" 
+                          class="form-control <%= (locals.errors && locals.errors.description) ? 'is-invalid' : '' %>">
+                          <%= formData && formData.description ? formData.description : '' %>
+                </textarea>
+                <% if (locals.errors && locals.errors.description) { %>
+                    <div class="invalid-feedback">
+                        <%= locals.errors.description %>
+                    </div>
+                <% } else { %>
+                    <div class="invalid-feedback">Description cannot exceed 500 characters</div>
+                <% } %>
             </div>
             
             <button type="submit" class="btn btn-primary">
@@ -138,21 +138,3 @@
 </div>
 
 <%- include('partials/footer') %>
-
-<script>
-// Client-side validation
-document.addEventListener('DOMContentLoaded', function() {
-  const forms = document.querySelectorAll('form[method="POST"]');
-  
-  forms.forEach(form => {
-    form.addEventListener('submit', function(e) {
-      const titleInput = this.querySelector('[name="title"]');
-      if (titleInput && titleInput.value.trim().length < 3) {
-        e.preventDefault();
-        titleInput.classList.add('is-invalid');
-        return false;
-      }
-    });
-  });
-});
-</script>

@@ -21,10 +21,10 @@ router.get("/completed", completed);
 router.get("/search", search);
 
 // Action routes - Updated to match requirements
-router.post("/tasks", addTask);              // Changed from /add-task
-router.patch("/tasks/:id", toggleTaskCompletion);  // Changed from POST /toggle-task/:id
-router.delete("/tasks/:id", deleteTask);     // Changed from POST /move-to-trash/:id
-router.put("/tasks/:id", updateTask);        // New route for updating task fields
+router.post("/tasks", addTask);              
+router.patch("/tasks/:id", toggleTaskCompletion);  
+router.delete("/tasks/:id", deleteTask);     
+router.put("/tasks/:id", updateTask);        
 
 // Keep these as they are (not in requirements but useful)
 router.post("/restore-from-trash/:id", restoreFromTrash);
